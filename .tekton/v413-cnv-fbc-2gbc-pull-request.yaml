@@ -1,0 +1,51 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  annotations:
+    build.appstudio.openshift.io/repo: https://github.com/sbose78/cnv-fbc?rev={{revision}}
+    build.appstudio.redhat.com/commit_sha: '{{revision}}'
+    build.appstudio.redhat.com/pull_request_number: '{{pull_request_number}}'
+    build.appstudio.redhat.com/target_branch: '{{target_branch}}'
+    pipelinesascode.tekton.dev/max-keep-runs: "3"
+    pipelinesascode.tekton.dev/on-event: '[pull_request]'
+    pipelinesascode.tekton.dev/on-target-branch: '[main]'
+  creationTimestamp: null
+  labels:
+    appstudio.openshift.io/application: cnv-fbc
+    appstudio.openshift.io/component: v413-cnv-fbc-2gbc
+    pipelines.appstudio.openshift.io/type: build
+  name: v413-cnv-fbc-2gbc-on-pull-request
+  namespace: shbose-tenant
+spec:
+  params:
+    - name: dockerfile
+      value: catalog.Dockerfile
+    - name: git-url
+      value: 'https://github.com/sbose78/cnv-fbc'
+    - name: output-image
+      value: >-
+        quay.io/redhat-user-workloads/shbose-tenant/cnv-fbc/v413-cnv-fbc-2gbc:build-3e24b-1686256746
+    - name: path-context
+      value: v4.13
+    - name: revision
+      value: main
+    - name: skip-checks
+      value: 'true'
+  pipelineRef:
+    bundle: >-
+      quay.io/redhat-appstudio-tekton-catalog/pipeline-fbc-builder:c31f6ad4939f52b30b10331097a21a0d03ca1745
+    name: fbc-builder
+  serviceAccountName: appstudio-pipeline
+  timeout: 1h0m0s
+  workspaces:
+    - name: workspace
+      volumeClaimTemplate:
+        metadata:
+          creationTimestamp: null
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+        status: {}
